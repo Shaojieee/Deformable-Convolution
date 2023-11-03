@@ -28,8 +28,10 @@ def generate_torch_dataset(
         target_transform=target_transform,
         download=True
     )
-
-    num_classes = len(train_dataset.targets.unique())
+    if isinstance(train_dataset.targets, list):
+        num_classes = len(set(train_dataset.targets))
+    else:
+        num_classes = len(train_dataset.targets.unique())
 
     train_size = int((1-val_size) * len(train_dataset))
     val_size = len(train_dataset) - train_size
