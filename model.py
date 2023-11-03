@@ -309,7 +309,7 @@ class Bottleneck(nn.Module):
 # added method to freeze all layers except the offset layers
 class Resnet(nn.Module):
 
-    def __init__(self, block, layers, cbam=False, dcn=False,unfreeze_dcn=True,unfreeze_offset=True,unfreeze_fc=True, drop_prob=0):
+    def __init__(self, block, layers, num_classes, cbam=False, dcn=False,unfreeze_dcn=True,unfreeze_offset=True,unfreeze_fc=True, drop_prob=0):
         super(Resnet, self).__init__()
         self.inplanes = 64
         self.dcn = dcn
@@ -364,7 +364,7 @@ class Resnet(nn.Module):
         if unfreeze_offset:
             self.unfreeze_offset()
         if unfreeze_fc:
-            self.unfreeze_fc
+            self.unfreeze_fc()
     
     def freeze_all_layers(self):
         for param in self.parameters():
@@ -385,7 +385,7 @@ class Resnet(nn.Module):
         for module in self.modules():
             if isinstance(module,nn.Linear):
                 for param in module.parameters():
-                    param.requires_grad=True
+                    param.requires_grad = True
 
     def _make_layer(self, block, planes, blocks, stride=1, cbam=False, dcn=None):
         downsample = None

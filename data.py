@@ -50,7 +50,6 @@ def generate_torch_dataset(
 
 def fashionmnist_image_transform():
     transform = transforms.Compose([ 
-        # Replace with the transform object(s) 
         transforms.Grayscale(3),
         transforms.ToTensor()
     ]) 
