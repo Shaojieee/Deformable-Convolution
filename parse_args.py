@@ -11,7 +11,7 @@ def parse_args():
     parser.add_argument(
         '--output_dir', 
         type=str, 
-        default='./logs/' + datetime.datetime.now().strftime('%Y%m%d_%H%M'),
+        default=None,
         help='Output dir for this experiment'
     )
 

@@ -2,10 +2,10 @@ import pandas as pd
 import torch
 import numpy as np
 
-def evaluation_fn(y_true, y_pred):
+def evaluation_fn(y_true, y_pred, **kwargs):
     return {
-        'Accuracy': torch.sum(y_true==y_pred),
-        'Avg Cross Entropy Loss': torch.nn.functional.cross_entropy(y_pred, y_true),
+        'Accuracy': torch.sum(y_true==torch.argmax(y_pred, axis=1)).item()/len(y_true),
+        'Avg Cross Entropy Loss': torch.nn.functional.cross_entropy(y_pred, y_true).item(),
     }
     
 

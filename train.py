@@ -9,7 +9,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
         train_loss = 0.0
         model.train()
         Y_true, Y_pred = [], []
-
+        print(f'Epoch {epoch}')
         for i, data in enumerate(train_dataloader, 0):
             optimizer.zero_grad()
             inputs, labels = data
@@ -35,12 +35,11 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
             stop_training = callback.on_epoch_end(
                 model=model,
                 loss=avg_train_loss,
-                Y_true=Y_actual,
+                Y_true=Y_true,
                 Y_pred=Y_pred,
                 epoch=epoch,
                 accelerator=accelerator
             )
-
             if stop_training:
                 return
 
@@ -65,13 +64,13 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
         Y_pred = Y_pred.cpu()
 
         # To get the avg loss
-        avg_train_loss = train_loss / len(val_dataloader)
+        avg_val_loss = val_loss / len(val_dataloader)
     
         for callback in val_callbacks:
             stop_training = callback.on_epoch_end(
                 model=model,
-                loss=avg_train_loss,
-                Y_true=Y_actual,
+                loss=avg_val_loss,
+                Y_true=Y_true,
                 Y_pred=Y_pred,
                 epoch=epoch,
                 accelerator=accelerator
