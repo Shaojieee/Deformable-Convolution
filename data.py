@@ -5,7 +5,6 @@ import os
 
 
 
-
 def generate_torch_dataset(
     dataset_name, # Which dataset to use 'cifar10', 'fashionmnist'
     train=True, # Return train set if true
