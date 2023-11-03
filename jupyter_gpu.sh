@@ -10,6 +10,6 @@
 
 
 module load anaconda
-source activate nndl
+source activate nndl_gpu
 
 jupyter notebook --ip=$(hostname -i) --port=8886
