@@ -1,6 +1,6 @@
 import pandas as pd
 import torch
-
+import numpy as np
 
 def evaluation_fn(y_true, y_pred):
     return {
@@ -12,15 +12,16 @@ def evaluation_fn(y_true, y_pred):
 
 # Runs the evaluation_fn and store and prints the results.
 class EvaluationCallback():
-    def __init__(self, evaluation_fn):
+    def __init__(self, evaluation_fn, type):
         self.evaluation_fn = evaluation_fn
+        self.type = type
         self.logs = []
 
     def on_epoch_end(self, epoch, Y_true, Y_pred, **kwargs):
         
-        results = self.evaluation_fn(Y_, Y_pred_, **kwargs)
+        results = self.evaluation_fn(Y_true, Y_pred, **kwargs)
 
-        output_string = f'Val Metrics: Epoch: {epoch}'
+        output_string = f'{self.type} Metrics: Epoch: {epoch}'
         for k, v in results.items():
             output_string += f' {k}: {v:.6f}'
         print(output_string)
@@ -28,7 +29,7 @@ class EvaluationCallback():
 
         self.logs.append(results)
     
-        return results
+        return False
                    
     def get_logs(self):
         return pd.DataFrame(self.logs)
@@ -59,7 +60,7 @@ class ModelCheckpoint():
         elif mode=='max':
             self.monitor_op = np.greater
               
-    def on_epoch_end(self, model, loss, epoch):
+    def on_epoch_end(self, model, loss, epoch, **kwargs):
         
         if self.monitor_op(loss - self.min_delta, self.best):
             self.best = loss

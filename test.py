@@ -1,23 +1,36 @@
 from accelerate import Accelerator
 import torch
 
-def test(model, test_dataloader):
+def test(model, loss_fn, test_dataloader, callbacks=[]):
     """ Test the model.
     """
-    accelerator = Accelerator()
-    model, test_dataloader = accelerator.prepare(model, test_dataloader)
 
     model.eval()
-    correct = 0
-    total = 0
-
+    test_loss = 0.0
+    Y_true, Y_pred = [], []
     with torch.no_grad():
         for data in test_dataloader:
             inputs, labels = data
             outputs = model(inputs)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    accuracy = round(correct/total,4)
+            loss = loss_fn(outputs, labels)
 
-    return accuracy
+            Y_true.append(labels); Y_pred.append(outputs)
+            val_loss += loss.detach().cpu().item()
+    
+    # Convert to tensor
+    Y_true = torch.cat(Y_true)
+    Y_pred = torch.cat(Y_pred)
+    Y_true = Y_true.cpu()
+    Y_pred = Y_pred.cpu()
+
+    # To get the avg loss
+    avg_train_loss = train_loss / len(test_dataloader)
+
+    for callback in val_callbacks:
+        callback.on_epoch_end(
+            model=model,
+            loss=avg_train_loss,
+            Y_true=Y_actual,
+            Y_pred=Y_pred,
+            epoch=epoch
+        )

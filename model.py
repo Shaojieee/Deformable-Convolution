@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch import nn
 import numpy as np
 import math
+import torch.utils.model_zoo as model_zoo
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -181,7 +182,6 @@ class ChannelAttention(nn.Module):
 
 
 
-
 def constant_init(module, constant, bias=0):
     nn.init.constant_(module.weight, constant)
     if hasattr(module, 'bias'):
@@ -308,7 +308,7 @@ class Bottleneck(nn.Module):
 # added method to freeze all layers except the offset layers
 class Resnet(nn.Module):
 
-    def __init__(self, block, layers, cbam=False, dcn=False, drop_prob=0):
+    def __init__(self, block, layers, num_classes, cbam=False, dcn=False, drop_prob=0):
         super(Resnet, self).__init__()
         self.inplanes = 64
         self.dcn = dcn
@@ -331,6 +331,9 @@ class Resnet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2, cbam=self.cbam, dcn=dcn)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2, cbam=self.cbam, dcn=dcn)
 
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.output_fc = nn.Linear(self.out_channels[2] * 2, num_classes)
+
         if self.dcn is not None:
             for m in self.modules():
                 if isinstance(m, Bottleneck) or isinstance(m, BasicBlock):
@@ -341,6 +344,7 @@ class Resnet(nn.Module):
                           self.out_channels[1] * 2,
                           self.out_channels[2] * 2]
 
+
         print("backbone output channel: C3 {}, C4 {}, C5 {}".format(self.out_channels[0] * 2, self.out_channels[1] * 2, self.out_channels[2] * 2))
 
         for m in self.modules():
@@ -350,9 +354,11 @@ class Resnet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
+        
+       
 
-        # self.freeze_bn()
-        self.freeze_all_except_offset()
+        self.freeze_bn()
+        # self.freeze_all_except_offset()
     
 
     # function to freeze parameters of all layers except offset layers
@@ -399,7 +405,13 @@ class Resnet(nn.Module):
         x3 = self.layer3(x2)
         x4 = self.layer4(x3)
 
-        return x2, x3, x4
+        xx4 = self.avgpool(x4)
+        x = torch.flatten(x4, 1)
+        x = self.output_fc(x)
+
+        y = torch.softmax(x, dim=1)
+        
+        return y
 
 
 def resnet18(pretrained=False, **kwargs):
