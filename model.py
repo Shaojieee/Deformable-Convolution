@@ -309,7 +309,7 @@ class Bottleneck(nn.Module):
 # added method to freeze all layers except the offset layers
 class Resnet(nn.Module):
 
-    def __init__(self, block, layers, num_classes, cbam=False, dcn=False,unfreeze_dcn=True,unfreeze_offset=True,unfreeze_fc=True, drop_prob=0):
+    def __init__(self, block, layers, num_classes, cbam=False, dcn=[False,False,True,True],unfreeze_dcn=True,unfreeze_offset=True,unfreeze_fc=True, drop_prob=0):
         super(Resnet, self).__init__()
         self.inplanes = 64
         self.dcn = dcn
@@ -327,10 +327,10 @@ class Resnet(nn.Module):
                 stop_value=drop_prob,
                 nr_steps=5e3
             )
-        self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, cbam=self.cbam)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, cbam=self.cbam, dcn=dcn)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, cbam=self.cbam, dcn=dcn)
+        self.layer1 = self._make_layer(block, 64, layers[0],dcn=dcn[0])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, cbam=self.cbam,dcn[1])
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, cbam=self.cbam, dcn=dcn[2])
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, cbam=self.cbam, dcn=dcn[3])
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.output_fc = nn.Linear(self.out_channels[2] * 2, num_classes)
