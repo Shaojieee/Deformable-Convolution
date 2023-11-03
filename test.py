@@ -15,7 +15,7 @@ def test(model, loss_fn, test_dataloader, callbacks=[]):
             loss = loss_fn(outputs, labels)
 
             Y_true.append(labels); Y_pred.append(outputs)
-            val_loss += loss.detach().cpu().item()
+            test_loss += loss.detach().cpu().item()
     
     # Convert to tensor
     Y_true = torch.cat(Y_true)
@@ -24,13 +24,13 @@ def test(model, loss_fn, test_dataloader, callbacks=[]):
     Y_pred = Y_pred.cpu()
 
     # To get the avg loss
-    avg_train_loss = train_loss / len(test_dataloader)
+    avg_test_loss = test_loss / len(test_dataloader)
 
-    for callback in val_callbacks:
+    for callback in callbacks:
         callback.on_epoch_end(
             model=model,
-            loss=avg_train_loss,
-            Y_true=Y_actual,
+            loss=avg_test_loss,
+            Y_true=Y_true,
             Y_pred=Y_pred,
-            epoch=epoch
+            epoch=0
         )

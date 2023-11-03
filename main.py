@@ -5,6 +5,7 @@ from utils import EvaluationCallback, ModelCheckpoint, evaluation_fn
 from train import train
 from test import test
 
+import datetime
 import os
 from tqdm import tqdm
 import torch
@@ -18,11 +19,16 @@ def main():
     args = parse_args()
     print(args)
 
+    if args.output_dir==None:
+        args.output_dir = f'./resnet_{args.resnet_version}_{"deformable" if args.with_deformable_conv else "normal"}_{args.dataset}_{datetime.datetime.now().strftime("%Y%m%d_%H%M")}'
+
     os.makedirs(args.output_dir, exist_ok=True)
     if args.fp16:
         args.mixed_precision="fp16"
     else:
         args.mixed_precision="no"
+
+    
 
     accelerator = Accelerator(
         mixed_precision=args.mixed_precision,
@@ -66,7 +72,7 @@ def main():
         restore_best_weights=args.restore_best_weights
     )
 
-    model, train_dataset, train_dataloader, test_dataloader, optimizer = accelerator.prepare(model, train_dataloader, val_dataloader, test_dataloader, optimizer)
+    model, train_dataloader, val_dataloader, test_dataloader, optimizer = accelerator.prepare(model, train_dataloader, val_dataloader, test_dataloader, optimizer)
 
     train(
         model, 
@@ -88,6 +94,7 @@ def main():
     
     test(
         model, 
+        loss_fn,
         test_dataloader,
         callbacks=[test_callback]
     )
