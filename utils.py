@@ -1,6 +1,15 @@
 import pandas as pd
 import torch
 
+
+def evaluation_fn(y_true, y_pred):
+    return {
+        'Accuracy': torch.sum(y_true==y_pred),
+        'Avg Cross Entropy Loss': torch.nn.functional.cross_entropy(y_pred, y_true),
+    }
+    
+
+
 # Runs the evaluation_fn and store and prints the results.
 class EvaluationCallback():
     def __init__(self, evaluation_fn):
