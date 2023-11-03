@@ -180,8 +180,6 @@ class ChannelAttention(nn.Module):
         return out
 
 
-
-
 def constant_init(module, constant, bias=0):
     nn.init.constant_(module.weight, constant)
     if hasattr(module, 'bias'):
@@ -254,6 +252,8 @@ class Bottleneck(nn.Module):
         self.with_dcn = dcn
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
+
+        # Replace 3*3 normal conv2d with deformconv2d if dcn=True
         if not self.with_dcn:
             self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         else:
@@ -308,7 +308,7 @@ class Bottleneck(nn.Module):
 # added method to freeze all layers except the offset layers
 class Resnet(nn.Module):
 
-    def __init__(self, block, layers, cbam=False, dcn=False, drop_prob=0):
+    def __init__(self, block, layers, cbam=False, dcn=False,unfreeze_dcn=True,unfreeze_offset=True, drop_prob=0):
         super(Resnet, self).__init__()
         self.inplanes = 64
         self.dcn = dcn
@@ -352,15 +352,25 @@ class Resnet(nn.Module):
                 m.bias.data.zero_()
 
         # self.freeze_bn()
-        self.freeze_all_except_offset()
+        self.freeze_all_layers()
+        if unfreeze_dcn:
+            self.unfreeze_dcn()
+        if unfreeze_offset:
+            self.unfreeze_offset()
     
-
-    # function to freeze parameters of all layers except offset layers
-    def freeze_all_except_offset(self):
+    def freeze_all_layers():
+        for param in model.parameters():
+            param.requires_grad = False
+    
+    def unfreeze_dcn():
+        for module in self.modules():
+            if isinstance(module, DeformConv2d):
+                param.requires_grad = True
+    
+    def unfreeze_offset():
         for name, param in self.named_parameters():
-            if 'offset' not in name:
-                param.requires_grad = False
-
+            if 'offset' in name:
+                param.requires_grad = True
 
     def _make_layer(self, block, planes, blocks, stride=1, cbam=False, dcn=None):
         downsample = None
