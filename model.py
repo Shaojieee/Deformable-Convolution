@@ -4,6 +4,8 @@ import torch.nn.functional as F
 from torch import nn
 import numpy as np
 import math
+from torchvision.ops import DeformConv2d
+
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -204,7 +206,6 @@ class BasicBlock(nn.Module):
         if not self.with_dcn:
             self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, padding=1, bias=False)
         else:
-            from torchvision.ops import DeformConv2d
             # deformable_groups = dcn.get('deformable_groups', 1)
             deformable_groups = 1
             offset_channels = 18
@@ -259,7 +260,6 @@ class Bottleneck(nn.Module):
         else:
             # deformable_groups = dcn.get('deformable_groups', 1)
             deformable_groups = 1
-            from torchvision.ops import DeformConv2d
             offset_channels = 18
             self.conv2_offset = nn.Conv2d(planes, deformable_groups * offset_channels, stride=stride, kernel_size=3, padding=1)
             self.conv2 = DeformConv2d(planes, planes, kernel_size=3, padding=1, stride=stride, bias=False)
@@ -308,7 +308,7 @@ class Bottleneck(nn.Module):
 # added method to freeze all layers except the offset layers
 class Resnet(nn.Module):
 
-    def __init__(self, block, layers, cbam=False, dcn=False,unfreeze_dcn=True,unfreeze_offset=True, drop_prob=0):
+    def __init__(self, block, layers, cbam=False, dcn=False,unfreeze_dcn=True,unfreeze_offset=True,unfreeze_fc=True, drop_prob=0):
         super(Resnet, self).__init__()
         self.inplanes = 64
         self.dcn = dcn
@@ -351,26 +351,34 @@ class Resnet(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-        # self.freeze_bn()
         self.freeze_all_layers()
         if unfreeze_dcn:
             self.unfreeze_dcn()
         if unfreeze_offset:
             self.unfreeze_offset()
+        if unfreeze_fc:
+            self.unfreeze_fc
     
-    def freeze_all_layers():
-        for param in model.parameters():
+    def freeze_all_layers(self):
+        for param in self.parameters():
             param.requires_grad = False
     
-    def unfreeze_dcn():
+    def unfreeze_dcn(self):
         for module in self.modules():
             if isinstance(module, DeformConv2d):
-                param.requires_grad = True
-    
-    def unfreeze_offset():
+                for param in module.parameters():
+                    param.requires_grad = True
+
+    def unfreeze_offset(self):
         for name, param in self.named_parameters():
             if 'offset' in name:
                 param.requires_grad = True
+    
+    def unfreeze_fc(self):
+        for module in self.modules():
+            if isinstance(module,nn.Linear):
+                for param in module.parameters():
+                    param.requires_grad=True
 
     def _make_layer(self, block, planes, blocks, stride=1, cbam=False, dcn=None):
         downsample = None
@@ -388,12 +396,6 @@ class Resnet(nn.Module):
             layers.append(block(self.inplanes, planes, cbam=cbam, dcn=dcn))
 
         return nn.Sequential(*layers)
-
-    def freeze_bn(self):
-        '''Freeze BatchNorm layers.'''
-        for layer in self.modules():
-            if isinstance(layer, nn.BatchNorm2d):
-                layer.eval()
 
     def forward(self, inputs):
         x = self.conv1(inputs)
