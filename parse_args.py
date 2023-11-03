@@ -33,6 +33,9 @@ def parse_args():
         '--with_deformable_conv',
         action='store_true'
     )
+    
+    # By default replace all 3*3 cpmv filter with deformconv2d in conv4 and conv5
+    parser.add_argument('--dcn', nargs=4, type=bool, default=[False, False, True, True])
 
     # With early stopping
     parser.add_argument('--early_stopping', action='store_true')
