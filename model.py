@@ -328,7 +328,7 @@ class Resnet(nn.Module):
                 nr_steps=5e3
             )
         self.layer1 = self._make_layer(block, 64, layers[0],dcn=dcn[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, cbam=self.cbam,dcn[1])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, cbam=self.cbam,dcn=dcn[1])
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2, cbam=self.cbam, dcn=dcn[2])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2, cbam=self.cbam, dcn=dcn[3])
 
