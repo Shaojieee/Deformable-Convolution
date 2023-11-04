@@ -29,10 +29,16 @@ def parse_args():
         help='Which resnet version to use'
     )
 
-    parser.add_argument(
-        '--with_deformable_conv',
-        action='store_true'
-    )
+    def str2bool(v):
+        if v.lower()=='true':
+            return True
+        elif v.lower() =='false':
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
+            
+    # By default replace all 3*3 cpmv filter with deformconv2d in conv4 and conv5
+    parser.add_argument('--with_deformable_conv', nargs=4, type=str2bool, default=[False, False, True, True])
 
     # With early stopping
     parser.add_argument('--early_stopping', action='store_true')
