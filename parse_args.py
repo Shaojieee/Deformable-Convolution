@@ -19,7 +19,7 @@ def parse_args():
         '--dataset', 
         type=str, 
         default='fashionmnist',
-        help='Can be fhashionmnist or cifar10'
+        help='Can be fashionmnist or cifar10'
     )
 
     parser.add_argument(

@@ -7,6 +7,7 @@ from test import test
 
 import datetime
 import os
+import json
 from tqdm import tqdm
 import torch
 import torch.nn
@@ -23,6 +24,11 @@ def main():
         args.output_dir = f'./resnet_{args.resnet_version}_{"deformable" if args.with_deformable_conv else "normal"}_{args.dataset}_{datetime.datetime.now().strftime("%Y%m%d_%H%M")}'
 
     os.makedirs(args.output_dir, exist_ok=True)
+
+    args_dict = vars(args)
+    with open(f"{args.output_dir}/experiment_details.json", 'w') as f:
+        json.dump(args_dict, f)
+    
     if args.fp16:
         args.mixed_precision="fp16"
     else:
