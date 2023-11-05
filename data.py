@@ -10,6 +10,7 @@ def generate_torch_dataset(
     val_size=0.2,
     transform=transforms.ToTensor(), # Convert image to tensor
     target_transform=None,
+    debug=False,
     seed=42
 ):
     os.makedirs('./datasets', exist_ok=True)
@@ -28,10 +29,14 @@ def generate_torch_dataset(
         target_transform=target_transform,
         download=True
     )
+
     if isinstance(train_dataset.targets, list):
         num_classes = len(set(train_dataset.targets))
     else:
         num_classes = len(train_dataset.targets.unique())
+
+    if debug:
+        train_dataset = torch.utils.data.Subset(train_dataset, [x for x in range(100)])
 
     train_size = int((1-val_size) * len(train_dataset))
     val_size = len(train_dataset) - train_size

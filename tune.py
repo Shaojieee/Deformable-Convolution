@@ -3,9 +3,10 @@ import torch
 import torch.nn as nn
 from model import resnet
 from utils import ModelCheckpoint
+from train import train
 
 
-def objective(trial, accelerator, args, train_dataloder, val_dataloader):
+def objective(trial, accelerator, args, train_dataloader, val_dataloader):
     # Hyperparameters we want optimize
     params = {
         "lr": trial.suggest_loguniform('lr', 1e-4, 1e-2),
@@ -15,7 +16,7 @@ def objective(trial, accelerator, args, train_dataloder, val_dataloader):
     # Get pretrained model
     model = resnet(
         pretrained=True, 
-        num_classes=args.num_classes
+        num_classes=args.num_classes,
         version=args.resnet_version, 
         dcn=args.with_deformable_conv,
         unfreeze_dcn=args.unfreeze_dcn,
@@ -35,7 +36,7 @@ def objective(trial, accelerator, args, train_dataloder, val_dataloader):
 
     model, train_dataloader, val_dataloader, optimizer = accelerator.prepare(model, train_dataloader, val_dataloader, optimizer)
 
-    model_checkpoint = ModelCheckpoint(
+    early_stopper = ModelCheckpoint(
         early_stop=True, 
         patience=10, 
         min_delta=0, 

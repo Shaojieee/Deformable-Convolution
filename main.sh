@@ -15,12 +15,20 @@ source activate nndl_gpu
 cd /home/FYP/szhong005/nndl/Deformable-Convolution
 
 python -W ignore main.py \
+                --tune \
                 --dataset "fashionmnist" \
-                --with_deformable_conv \
                 --resnet_version "101" \
+                --with_deformable_conv False False True True \
+                --unfreeze_dcn \
+                --unfreeze_offset \
+                --unfreeze_fc \
+                --early_stopping \
+                --patience 10 \
                 --mode "min" \
+                --min_delta 0 \
                 --restore_best_weight \
-                --learning_rate 0.005 \
-                --train_batch_size 32 \
-                --eval_batch_size 32 \
-                --num_epochs 1
+                --learning_rate 0.0001 \
+                --train_batch_size 64 \
+                --eval_batch_size 64 \
+                --num_epochs 200 \
+                # --debug
