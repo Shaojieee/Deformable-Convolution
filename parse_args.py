@@ -7,6 +7,7 @@ def parse_args():
 
     parser.add_argument('--fp16', action='store_true')
     parser.add_argument('--cpu', action='store_true')
+    parser.add_argument('--tune', action='store_true', help='To perform optuna model tuning for LR and optimiser')
 
     parser.add_argument(
         '--output_dir', 

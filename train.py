@@ -1,9 +1,12 @@
 from accelerate import Accelerator
 import torch
 from tqdm import tqdm
+import nummpy as np
 
 def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epochs, accelerator, train_callbacks=[], val_callbacks=[]):
 
+
+    best_val_loss = np.inf
     for epoch in tqdm(range(num_epochs)):
         
         train_loss = 0.0
@@ -32,7 +35,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
         avg_train_loss = train_loss / len(train_dataloader)
 
         for callback in train_callbacks:
-            stop_training = callback.on_epoch_end(
+            callback.on_epoch_end(
                 model=model,
                 loss=avg_train_loss,
                 Y_true=Y_true,
@@ -40,8 +43,6 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
                 epoch=epoch,
                 accelerator=accelerator
             )
-            if stop_training:
-                return
 
 
         # Evaluation phase
@@ -65,7 +66,8 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
 
         # To get the avg loss
         avg_val_loss = val_loss / len(val_dataloader)
-    
+        best_val_loss = min(avg_val_loss, best_val_loss)
+
         for callback in val_callbacks:
             stop_training = callback.on_epoch_end(
                 model=model,
@@ -76,5 +78,8 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
                 accelerator=accelerator
             )
             if stop_training:
-                return
+                return best_val_loss
 
+    return best_val_loss
+
+    
