@@ -4,6 +4,7 @@ from model import resnet
 from utils import EvaluationCallback, ModelCheckpoint, evaluation_fn
 from train import train
 from test import test
+from tune import objective
 
 import datetime
 import os
@@ -14,14 +15,17 @@ import torch.nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from accelerate import Accelerator 
+import optuna
 
 def main():
 
     args = parse_args()
     print(args)
 
+    args.has_deformable_conv = any(args.with_deformable_conv)
+
     if args.output_dir==None:
-        args.output_dir = f'./resnet_{args.resnet_version}_{"deformable" if args.with_deformable_conv else "normal"}_{args.dataset}_{datetime.datetime.now().strftime("%Y%m%d_%H%M")}'
+        args.output_dir = f'./resnet_{args.resnet_version}{"_tuned" if args.tune else ""}_{"deformable" if args.has_deformable_conv else "normal"}_{args.dataset}_{datetime.datetime.now().strftime("%Y%m%d_%H%M")}'
 
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -48,9 +52,10 @@ def main():
     train_dataset, val_dataset, test_dataset, num_classes = generate_torch_dataset(
         args.dataset,  
         val_size=0.2,
-        transform=fashionmnist_image_transform() if args.dataset=='fashionmnist' else cifar10_image_transform()
+        transform=fashionmnist_image_transform() if args.dataset=='fashionmnist' else cifar10_image_transform(),
+        debug=args.debug
     )
-
+    args.num_classes = num_classes
     print(f"No. of Classes: {num_classes}")
     
 
@@ -58,7 +63,45 @@ def main():
     val_dataloader = DataLoader(val_dataset, batch_size=args.eval_batch_size, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=args.eval_batch_size, shuffle=True)
 
-    model = resnet(version=args.resnet_version, pretrained=True, dcn=args.with_deformable_conv, num_classes=num_classes)
+
+    if args.tune:
+        sampler = optuna.samplers.TPESampler()    
+        study = optuna.create_study(
+            sampler=sampler,
+            pruner=optuna.pruners.MedianPruner(
+                n_startup_trials=2, n_warmup_steps=5, interval_steps=3
+            ),
+            direction='minimize'
+        )
+
+        study.optimize(func=(lambda x: objective(x,accelerator, args, train_dataloader, val_dataloader)), timeout=4*60*60, n_trials=10)
+        print(f'Best Loss Value: {study.best_value}')
+        print(f"Best Parameters: {study.best_params}")
+
+        optuna_df = study.trials_dataframe()
+        optuna_df.to_csv(f'{args.output_dir}/optuna_study.csv')
+
+        fig = optuna.visualization.plot_contour(study,params=['lr'])
+        fig.write_image(f"{args.output_dir}/contour_plot.png")
+
+        fig = optuna.visualization.plot_parallel_coordinate(study)
+        fig.write_image(f"{args.output_dir}/parallel_coordinate.png")
+
+        args.learning_rate = study.best_params['lr']
+
+        print('Training with best parameters')
+
+
+
+    model = resnet(
+        pretrained=True, 
+        num_classes=args.num_classes,
+        version=args.resnet_version, 
+        dcn=args.with_deformable_conv,
+        unfreeze_dcn=args.unfreeze_dcn,
+        unfreeze_offset=args.unfreeze_offset,
+        unfreeze_fc=args.unfreeze_fc,
+    )
 
     loss_fn = torch.nn.CrossEntropyLoss()
 

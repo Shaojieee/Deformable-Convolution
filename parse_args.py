@@ -2,11 +2,21 @@ import argparse
 import datetime
 
 
+def str2bool(v):
+    if v.lower()=='true':
+        return True
+    elif v.lower() =='false':
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument('--fp16', action='store_true')
     parser.add_argument('--cpu', action='store_true')
+    parser.add_argument('--tune', action='store_true', help='To perform optuna model tuning for LR and optimiser')
 
     parser.add_argument(
         '--output_dir', 
@@ -28,17 +38,13 @@ def parse_args():
         default='101',
         help='Which resnet version to use'
     )
-
-    def str2bool(v):
-        if v.lower()=='true':
-            return True
-        elif v.lower() =='false':
-            return False
-        else:
-            raise argparse.ArgumentTypeError('Boolean value expected.')
-            
+    
     # By default replace all 3*3 cpmv filter with deformconv2d in conv4 and conv5
     parser.add_argument('--with_deformable_conv', nargs=4, type=str2bool, default=[False, False, True, True])
+
+    parser.add_argument('--unfreeze_dcn', action='store_true')
+    parser.add_argument('--unfreeze_offset', action='store_true')
+    parser.add_argument('--unfreeze_fc', action='store_true')
 
     # With early stopping
     parser.add_argument('--early_stopping', action='store_true')
@@ -85,6 +91,8 @@ def parse_args():
     )
 
     parser.add_argument("--num_epochs", type=int, default=10, help="Total number of training epochs to perform.")
+
+    parser.add_argument('--debug', action='store_true')
 
     args = parser.parse_args()
 
