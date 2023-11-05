@@ -53,6 +53,14 @@ def generate_torch_dataset(
 def fashionmnist_image_transform():
     transform = transforms.Compose([ 
         transforms.Grayscale(3),
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ]) 
+    return transform
+
+def cifar10_image_transform():
+    transform = transforms.Compose([ 
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ]) 
     return transform
