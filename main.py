@@ -1,5 +1,5 @@
 from parse_args import parse_args
-from data import generate_torch_dataset, fashionmnist_image_transform
+from data import generate_torch_dataset, fashionmnist_image_transform, cifar10_image_transform
 from model import resnet
 from utils import EvaluationCallback, ModelCheckpoint, evaluation_fn
 from train import train
@@ -48,10 +48,10 @@ def main():
     train_dataset, val_dataset, test_dataset, num_classes = generate_torch_dataset(
         args.dataset,  
         val_size=0.2,
-        transform=fashionmnist_image_transform() if args.dataset=='fashionmnist' else transforms.ToTensor()
+        transform=fashionmnist_image_transform() if args.dataset=='fashionmnist' else cifar10_image_transform()
     )
 
-    print(num_classes)
+    print(f"No. of Classes: {num_classes}")
     
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.train_batch_size, shuffle=True)
