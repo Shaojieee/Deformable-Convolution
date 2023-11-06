@@ -2,13 +2,14 @@ from accelerate import Accelerator
 import torch
 from tqdm import tqdm
 import numpy as np
+import time
 
 def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epochs, accelerator, train_callbacks=[], val_callbacks=[]):
 
 
     best_val_loss = np.inf
     for epoch in tqdm(range(num_epochs)):
-        
+        start_train_time = time.time()
         train_loss = 0.0
         model.train()
         Y_true, Y_pred = [], []
@@ -24,6 +25,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
             Y_true.append(labels); Y_pred.append(outputs)
             train_loss += loss.detach().cpu().item()
 
+        end_train_time = time.time()
         
         # Convert to tensor
         Y_true = torch.cat(Y_true)
@@ -41,11 +43,13 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
                 Y_true=Y_true,
                 Y_pred=Y_pred,
                 epoch=epoch,
-                accelerator=accelerator
+                accelerator=accelerator,
+                time_taken=end_train_time-start_train_time
             )
 
 
         # Evaluation phase
+        start_val_time = time.time()
         model.eval()
         val_loss = 0.0
         Y_true, Y_pred = [], []
@@ -58,6 +62,8 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
                 Y_true.append(labels); Y_pred.append(outputs)
                 val_loss += loss.detach().cpu().item()
         
+        end_val_time = time.time()
+
         # Convert to tensor
         Y_true = torch.cat(Y_true)
         Y_pred = torch.cat(Y_pred)
@@ -75,7 +81,8 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
                 Y_true=Y_true,
                 Y_pred=Y_pred,
                 epoch=epoch,
-                accelerator=accelerator
+                accelerator=accelerator,
+                time_taken=end_val_time-start_val_time
             )
             if stop_training:
                 return best_val_loss

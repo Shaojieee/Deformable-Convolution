@@ -17,15 +17,19 @@ class EvaluationCallback():
         self.type = type
         self.logs = []
 
-    def on_epoch_end(self, epoch, Y_true, Y_pred, **kwargs):
+    def on_epoch_end(self, epoch, Y_true, Y_pred, time_taken, **kwargs):
         
         results = self.evaluation_fn(Y_true, Y_pred, **kwargs)
 
         output_string = f'{self.type} Metrics: Epoch: {epoch}'
         for k, v in results.items():
             output_string += f' {k}: {v:.6f}'
+
+        output_string += f' Time Taken: {time_taken:.3f}'
+        
         print(output_string)
         results['epoch'] = epoch
+        results['time_taken'] = time_taken
 
         self.logs.append(results)
     
