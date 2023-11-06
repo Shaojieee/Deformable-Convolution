@@ -37,7 +37,6 @@ def parse_args():
     # Unfreezing the last `x` 3*3 conv layer in corresponding resnet block
     parser.add_argument('--unfreeze_conv', nargs=4, type=int, default=[0,0,0,0])
 
-    parser.add_argument('--unfreeze_dcn', action='store_true')
     parser.add_argument('--unfreeze_offset', action='store_true')
     parser.add_argument('--unfreeze_fc', action='store_true')
 

@@ -12,7 +12,7 @@
 module load anaconda
 source activate nndl_gpu
 
-cd /home/FYP/szhong005/nndl/Deformable-Convolution
+cd /home/UG/keek0005/NNDL/Deformable-Convolution
 
 python -W ignore main.py \
                 --tune \

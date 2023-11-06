@@ -365,9 +365,6 @@ class Resnet(nn.Module):
             self.unfreeze_fc()
 
         self.unfreeze_conv(unfreeze_conv)
-        
-        for name,param in self.named_parameters():
-            print(name,param.requires_grad)
     
     def freeze_all_layers(self):
         for param in self.parameters():
@@ -409,7 +406,7 @@ class Resnet(nn.Module):
             )
         
         # True to set 3x3 conv to dcn
-        dcns = ([False]*blocks-dcn) + ([True]*dcn)
+        dcns = ([False]*(blocks-dcn)) + ([True]*dcn)
         layers = [block(self.inplanes, planes, stride, downsample, cbam=cbam, dcn=dcns[0])]
         self.inplanes = planes * block.expansion
         self.out_channels.append(self.inplanes)
