@@ -98,7 +98,7 @@ def main():
         num_classes=args.num_classes,
         version=args.resnet_version, 
         dcn=args.with_deformable_conv,
-        unfreeze_dcn=args.unfreeze_dcn,
+        unfreeze_conv=args.unfreeze_conv,
         unfreeze_offset=args.unfreeze_offset,
         unfreeze_fc=args.unfreeze_fc,
     )

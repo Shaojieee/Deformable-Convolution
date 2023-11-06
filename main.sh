@@ -12,14 +12,14 @@
 module load anaconda
 source activate nndl_gpu
 
-cd /home/FYP/szhong005/nndl/Deformable-Convolution
+cd /home/UG/keek0005/NNDL/Deformable-Convolution
 
 python -W ignore main.py \
                 --tune \
                 --dataset "fashionmnist" \
                 --resnet_version "101" \
-                --with_deformable_conv False False True True \
-                --unfreeze_dcn \
+                --with_deformable_conv 0 0 0 3\
+                --unfreeze_conv 0 0 0 0\
                 --unfreeze_offset \
                 --unfreeze_fc \
                 --early_stopping \
@@ -30,5 +30,5 @@ python -W ignore main.py \
                 --learning_rate 0.0001 \
                 --train_batch_size 64 \
                 --eval_batch_size 64 \
-                --num_epochs 200 \
-                # --debug
+                --num_epochs 1 \
+                --debug
