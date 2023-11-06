@@ -2,14 +2,6 @@ import argparse
 import datetime
 
 
-def str2bool(v):
-    if v.lower()=='true':
-        return True
-    elif v.lower() =='false':
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
 
 def parse_args():
     parser = argparse.ArgumentParser(description="")
@@ -39,8 +31,8 @@ def parse_args():
         help='Which resnet version to use'
     )
     
-    # By default replace all 3*3 cpmv filter with deformconv2d in conv4 and conv5
-    parser.add_argument('--with_deformable_conv', nargs=4, type=str2bool, default=[False, False, True, True])
+    # Replace the `x` layer in each resnet block with deformable convolution
+    parser.add_argument('--with_deformable_conv', nargs=4, type=int, default=[0,0,0,0])
 
     parser.add_argument('--unfreeze_dcn', action='store_true')
     parser.add_argument('--unfreeze_offset', action='store_true')
