@@ -309,7 +309,7 @@ class Bottleneck(nn.Module):
 # added method to freeze all layers except the offset layers
 class Resnet(nn.Module):
 
-    def __init__(self, block, layers, num_classes, cbam=False, dcn=[False,False,True,True],unfreeze_dcn=True,unfreeze_offset=True,unfreeze_fc=True, drop_prob=0):
+    def __init__(self, block, layers, num_classes, cbam=False, dcn=[0,0,0,0],unfreeze_dcn=True,unfreeze_offset=True,unfreeze_fc=True, drop_prob=0):
         super(Resnet, self).__init__()
         self.inplanes = 64
         self.dcn = dcn
@@ -387,7 +387,7 @@ class Resnet(nn.Module):
                 for param in module.parameters():
                     param.requires_grad = True
 
-    def _make_layer(self, block, planes, blocks, stride=1, cbam=False, dcn=None):
+    def _make_layer(self, block, planes, blocks, stride=1, cbam=False, dcn=0):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
@@ -395,12 +395,15 @@ class Resnet(nn.Module):
                           kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(planes * block.expansion),
             )
-
-        layers = [block(self.inplanes, planes, stride, downsample, cbam=cbam, dcn=dcn)]
+        
+        # True to set 3x3 conv to dcn
+        dcns = ([False]*blocks-dcn) + ([True]*dcn)
+        layers = [block(self.inplanes, planes, stride, downsample, cbam=cbam, dcn=dcns[0])]
         self.inplanes = planes * block.expansion
         self.out_channels.append(self.inplanes)
+
         for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes, cbam=cbam, dcn=dcn))
+            layers.append(block(self.inplanes, planes, cbam=cbam, dcn=dcns[i]))
 
         return nn.Sequential(*layers)
 
