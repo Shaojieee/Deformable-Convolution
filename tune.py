@@ -9,7 +9,7 @@ from train import train
 def objective(trial, accelerator, args, train_dataloader, val_dataloader):
     # Hyperparameters we want optimize
     params = {
-        "lr": trial.suggest_loguniform('lr', 1e-4, 1e-2),
+        "lr": trial.suggest_loguniform('lr', 5*1e-5, 5*1e-4),
         # "optimizer_name": trial.suggest_categorical('optimizer_name',["SGD", "Adam"])
     }
     
@@ -56,3 +56,6 @@ def objective(trial, accelerator, args, train_dataloader, val_dataloader):
     )
     
     return best_val_loss
+
+
+    
