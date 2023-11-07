@@ -55,17 +55,25 @@ def generate_torch_dataset(
     return train_dataset, val_dataset, test_dataset, num_classes
 
 
-def fashionmnist_image_transform():
-    transform = transforms.Compose([ 
+def fashionmnist_image_transform(normalise=True):
+    transform = [ 
         transforms.Grayscale(3),
+        transforms.Resize(224),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ]) 
+    ]
+    if normalise:
+        transform.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+
+    transform = transforms.Compose(transform) 
     return transform
 
-def cifar10_image_transform():
-    transform = transforms.Compose([ 
+def cifar10_image_transform(normalise=True):
+    transform = [
+        transforms.Resize(224),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ]) 
+    ]
+    if normalise:
+        transform.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+
+    transform = transforms.Compose(transform) 
     return transform
