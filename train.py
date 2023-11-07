@@ -3,7 +3,7 @@ import torch
 from tqdm import tqdm
 import numpy as np
 import time
-from util import EvaluationCallback, ModelCheckpoint
+from utils import EvaluationCallback, ModelCheckpoint
 
 def train(args, model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epochs, accelerator, train_callbacks=[], val_callbacks=[]):
 
