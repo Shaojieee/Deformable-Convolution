@@ -3,7 +3,7 @@ import datetime
 
 
 
-def parse_args():
+def main_parse_args():
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument('--fp16', action='store_true')
@@ -87,6 +87,64 @@ def parse_args():
     parser.add_argument("--num_epochs", type=int, default=10, help="Total number of training epochs to perform.")
 
     parser.add_argument('--debug', action='store_true')
+
+    args = parser.parse_args()
+
+    return args
+
+
+def offset_parse_args():
+    parser = argparse.ArgumentParser(description="")
+
+    parser.add_argument('--video', action='store_true')
+    parser.add_argument(
+        '--fps',
+        type=int,
+        help='FPS for the video'
+    )
+    parser.add_argument(
+        '--duration',
+        type=int,
+        help='Duration for the video'
+    )
+
+    parser.add_argument(
+        '--output_dir', 
+        type=str,
+        help='Output Dir'
+    )
+
+    parser.add_argument(
+        '--image_file', 
+        type=str,
+        help='Image file to generate'
+    )
+
+    parser.add_argument(
+        '--model_weights', 
+        type=str,
+        help='Model Weights '
+    )
+
+
+    parser.add_argument(
+        '--resnet_version',
+        type=str,
+        default='101',
+        help='Which resnet version to use'
+    )
+    
+    # Replace the `x` layer in each resnet block with deformable convolution
+    parser.add_argument('--with_deformable_conv', nargs=4, type=int, default=[0,0,0,0])
+
+    # Unfreezing the last `x` 3*3 conv layer in corresponding resnet block
+    parser.add_argument('--unfreeze_conv', nargs=4, type=int, default=[0,0,0,0])
+
+    parser.add_argument('--unfreeze_offset', action='store_true')
+    parser.add_argument('--unfreeze_fc', action='store_true')
+
+    parser.add_argument('--num_classes', type=int, default=10)
+
 
     args = parser.parse_args()
 

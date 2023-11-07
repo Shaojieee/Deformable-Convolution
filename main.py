@@ -1,4 +1,4 @@
-from parse_args import parse_args
+from parse_args import main_parse_args
 from data import generate_torch_dataset, fashionmnist_image_transform, cifar10_image_transform
 from model import resnet
 from utils import EvaluationCallback, ModelCheckpoint, evaluation_fn
@@ -19,7 +19,7 @@ import optuna
 
 def main():
 
-    args = parse_args()
+    args = main_parse_args()
     print(args)
 
     args.has_deformable_conv = any(args.with_deformable_conv)
