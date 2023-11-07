@@ -40,6 +40,8 @@ def main_parse_args():
     parser.add_argument('--unfreeze_offset', action='store_true')
     parser.add_argument('--unfreeze_fc', action='store_true')
 
+    parser.add_argument('--model_weights', type=str, default=None, help='File path to model weight')
+
     # With early stopping
     parser.add_argument('--early_stopping', action='store_true')
 

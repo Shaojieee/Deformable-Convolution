@@ -103,6 +103,9 @@ def main():
         unfreeze_fc=args.unfreeze_fc,
     )
 
+    if args.model_weights:
+        model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')), strict=True)
+
     loss_fn = torch.nn.CrossEntropyLoss()
 
     optimizer = torch.optim.Adam(
