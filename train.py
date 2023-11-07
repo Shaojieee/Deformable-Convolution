@@ -3,8 +3,9 @@ import torch
 from tqdm import tqdm
 import numpy as np
 import time
+from util import EvaluationCallback, ModelCheckpoint
 
-def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epochs, accelerator, train_callbacks=[], val_callbacks=[]):
+def train(args, model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epochs, accelerator, train_callbacks=[], val_callbacks=[]):
 
 
     best_val_loss = np.inf
@@ -46,6 +47,10 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
                 accelerator=accelerator,
                 time_taken=end_train_time-start_train_time
             )
+            if isinstance(callback, EvaluationCallback):
+                callback.save_results(args.output_dir, 'train.csv')
+            if isinstance(callback, ModelCheckpoint):
+                callback.save_best_weights(accelerator, args.output_dir)
 
 
         # Evaluation phase
@@ -84,6 +89,12 @@ def train(model, train_dataloader, val_dataloader, loss_fn, optimizer, num_epoch
                 accelerator=accelerator,
                 time_taken=end_val_time-start_val_time
             )
+
+            if isinstance(callback, EvaluationCallback):
+                callback.save_results(args.output_dir, 'val.csv')
+            if isinstance(callback, ModelCheckpoint):
+                callback.save_best_weights(accelerator, args.output_dir)
+
             if stop_training:
                 return best_val_loss
 

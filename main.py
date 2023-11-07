@@ -124,6 +124,7 @@ def main():
     model, train_dataloader, val_dataloader, test_dataloader, optimizer = accelerator.prepare(model, train_dataloader, val_dataloader, test_dataloader, optimizer)
 
     train(
+        args,
         model, 
         train_dataloader, 
         val_dataloader, 
