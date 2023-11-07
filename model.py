@@ -6,14 +6,15 @@ import numpy as np
 import math
 import torch.utils.model_zoo as model_zoo
 from torchvision.ops import DeformConv2d
+import torchvision.models as torch_models
 
 
 model_urls = {
-    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
-    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
-    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
+    'resnet18': torch_models.ResNet18_Weights.DEFAULT.url,
+    'resnet34': torch_models.ResNet34_Weights.DEFAULT.url,
+    'resnet50': torch_models.ResNet50_Weights.DEFAULT.url,
+    'resnet101': torch_models.ResNet101_Weights.DEFAULT.url,
+    'resnet152': torch_models.ResNet152_Weights.DEFAULT.url,
 }
 
 class DropBlock2D(nn.Module):
@@ -430,7 +431,7 @@ class Resnet(nn.Module):
         x3 = self.layer3(x2)
         x4 = self.layer4(x3)
 
-        xx4 = self.avgpool(x4)
+        x4 = self.avgpool(x4)
         x = torch.flatten(x4, 1)
         x = self.output_fc(x)
 
