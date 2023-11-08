@@ -3,7 +3,8 @@ import torch
 import time
 
 def test(model, loss_fn, test_dataloader, callbacks=[]):
-    """ Test the model.
+    """ 
+    Test the model.
     """
 
     model.eval()
@@ -30,6 +31,7 @@ def test(model, loss_fn, test_dataloader, callbacks=[]):
     # To get the avg loss
     avg_test_loss = test_loss / len(test_dataloader)
 
+    # Run the callbacks
     for callback in callbacks:
         callback.on_epoch_end(
             model=model,

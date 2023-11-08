@@ -31,19 +31,19 @@ def main_parse_args():
         help='Which resnet version to use'
     )
     
-    # Replace the `x` layer in each resnet block with deformable convolution
+    # Replace the `x` layer in the i_th conv block with deformable convolution
     parser.add_argument('--with_deformable_conv', nargs=4, type=int, default=[0,0,0,0])
 
-    # Unfreezing the last `x` 3*3 conv layer in corresponding resnet block
+    # Unfreezing the last `x` 3*3 conv layer in i_th conv block
     parser.add_argument('--unfreeze_conv', nargs=4, type=int, default=[0,0,0,0])
 
-    parser.add_argument('--unfreeze_offset', action='store_true')
-    parser.add_argument('--unfreeze_fc', action='store_true')
+    parser.add_argument('--unfreeze_offset', action='store_true', help='Set to unfreeze all offsets')
+    parser.add_argument('--unfreeze_fc', action='store_true', help='Set to unfreeze output layer')
 
-    parser.add_argument('--model_weights', type=str, default=None, help='File path to model weight')
+    parser.add_argument('--model_weights', type=str, default=None, help="File path to model's weight")
 
     # With early stopping
-    parser.add_argument('--early_stopping', action='store_true')
+    parser.add_argument('--early_stopping', action='store_true', help='Set to use early_stopping')
 
     parser.add_argument(
         "--patience",
@@ -61,7 +61,7 @@ def main_parse_args():
         help="minimum difference in performance for early stopping",
     )
 
-    parser.add_argument('--restore_best_weights', action='store_true')
+    parser.add_argument('--restore_best_weights', action='store_true', help="Whether to use best weights to test evaluation")
 
     # Learning rate
     parser.add_argument(
@@ -83,12 +83,12 @@ def main_parse_args():
         "--eval_batch_size",
         type=int,
         default=32,
-        help="Batch size for the evaluation dataloader.",
+        help="Batch size for the val and test dataloader.",
     )
 
     parser.add_argument("--num_epochs", type=int, default=10, help="Total number of training epochs to perform.")
 
-    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--debug', action='store_true', help='Set to run on subset of data')
 
     args = parser.parse_args()
 

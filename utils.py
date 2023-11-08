@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 import numpy as np
 
+# Evaluation function for this image classification problem
 def evaluation_fn(y_true, y_pred, **kwargs):
     return {
         'Accuracy': torch.sum(y_true==torch.argmax(y_pred, axis=1)).item()/len(y_true),
@@ -17,6 +18,7 @@ class EvaluationCallback():
         self.type = type
         self.logs = []
 
+    # Function will run after every epoch
     def on_epoch_end(self, epoch, Y_true, Y_pred, time_taken, **kwargs):
         
         results = self.evaluation_fn(Y_true, Y_pred, **kwargs)
@@ -63,7 +65,8 @@ class ModelCheckpoint():
             self.monitor_op = np.less
         elif mode=='max':
             self.monitor_op = np.greater
-              
+    
+    # Function will run after every epoch
     def on_epoch_end(self, model, loss, epoch, **kwargs):
         
         if self.monitor_op(loss - self.min_delta, self.best):

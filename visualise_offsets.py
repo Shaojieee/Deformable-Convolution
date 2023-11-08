@@ -147,7 +147,7 @@ def generate_offsets():
     with torch.no_grad():
         # 24 fps * 10 sec
         for i in tqdm(range(fps*duration)):
-            image = cv2.imread('sample.png')
+            image = cv2.imread(image_file)
             image = cv2.resize(image, (224,224))
             input_img_h, input_img_w, input_img_c = image.shape
 
@@ -171,14 +171,14 @@ def generate_offsets():
             image = cv2.resize(image, dsize=(224,224))
 
             if args.video==False:
-                cv2.imwrite(f'{output_dir}/offsets.png')
+                cv2.imwrite(f'{output_dir}/offsets.png', image)
                 break
             else:
                 images.append(image)
     
     if args.video:
-        fourcc = cv2.VideoWriter_fourcc(*'XVID') 
-        video = cv2.VideoWriter(f'{output_dir}/offsets.avi', fourcc, fps, (224, 224))
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
+        video = cv2.VideoWriter(f'{output_dir}/offsets.mp4', fourcc, fps, (224, 224))
 
         for j in range(fps*duration):
             video.write(images[j])
