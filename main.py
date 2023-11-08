@@ -104,7 +104,11 @@ def main():
     )
 
     if args.model_weights:
-        model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')), strict=True)
+        try:
+            model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')), strict=True)
+        except Exception as e:
+            print(e)
+            model.load_state_dict(torch.load(args.model_weights, map_location=torch.device('cpu')), strict=False)
 
     loss_fn = torch.nn.CrossEntropyLoss()
 
