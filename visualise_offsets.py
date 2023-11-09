@@ -120,7 +120,7 @@ def generate_offsets():
         unfreeze_fc=args.unfreeze_fc,
     )
 
-    model.load_state_dict(torch.load(model_weights, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(model_weights, map_location=torch.device('cpu')), strict=True)
 
 
     save_output = SaveOutput()
