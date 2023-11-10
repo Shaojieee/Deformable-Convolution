@@ -77,7 +77,7 @@ class BasicBlock(nn.Module):
 # Consists of three Convolutional Layers, used as building blocks in resnet50 & higher
 class Bottleneck(nn.Module):
     expansion = 4
-
+    # Set dcn to True to replace 3*3 convolution with 3*3 deformable convolution
     def __init__(self, inplanes, planes, stride=1, downsample=None, dcn=False):
         super(Bottleneck, self).__init__()
         self.with_dcn = dcn
@@ -91,6 +91,7 @@ class Bottleneck(nn.Module):
             # deformable_groups = dcn.get('deformable_groups', 1)
             deformable_groups = 1
             offset_channels = 18
+            # Replacing with deformable convolution
             self.conv2_offset = nn.Conv2d(planes, deformable_groups * offset_channels, stride=stride, kernel_size=3, padding=1)
             self.conv2 = DeformConv2d(planes, planes, kernel_size=3, padding=1, stride=stride, bias=False)
 
@@ -131,7 +132,10 @@ class Bottleneck(nn.Module):
 
 
 class Resnet(nn.Module):
-
+    """
+        dcn: list of int to specify how many layers in each conv block to replace with deformable convolution
+        unfreeze_conv: list of int to specific how many layers of deformable or convolution layers to unfreeze in each conv block
+    """
     def __init__(self, block, layers, num_classes, dcn=[0,0,0,0],unfreeze_conv=[0,0,0,0],unfreeze_offset=True,unfreeze_fc=True):
         super(Resnet, self).__init__()
         self.inplanes = 64
@@ -142,6 +146,7 @@ class Resnet(nn.Module):
         self.out_channels = []
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
+        # Building ResNet conv block
         self.layer1 = self._make_layer(block, 64, layers[0],dcn=dcn[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,dcn=dcn[1])
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dcn=dcn[2])
@@ -150,6 +155,7 @@ class Resnet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.output_fc = nn.Linear(self.out_channels[2] * 2, num_classes)
 
+        # Initilialising offset weights as 0
         if self.dcn is not None:
             for m in self.modules():
                 if isinstance(m, Bottleneck) or isinstance(m, BasicBlock):
@@ -172,13 +178,16 @@ class Resnet(nn.Module):
                 m.bias.data.zero_()
         
        
-
+        # Freezing layer for fine tune training
         self.freeze_all_layers()
+        # Unfreezing offsets
         if unfreeze_offset:
             self.unfreeze_offset()
+        #Unfreezing fully connected layer
         if unfreeze_fc:
             self.unfreeze_fc()
 
+        # Unfreezing selected 3*3 conv layer
         self.unfreeze_conv(unfreeze_conv)
     
     def freeze_all_layers(self):

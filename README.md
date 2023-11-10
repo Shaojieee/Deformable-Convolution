@@ -2,7 +2,6 @@
 
 This repository contains code to train ResNet models with Deformable Convolution using the FashionMNIST and CIFAR10 datasets.
 
----
 ## Installation
 Ensure that you have conda set up on your device. 
 Install the environment by running the following command.
@@ -42,3 +41,20 @@ For `--with_deformable_conv` flag, `1 2 3 4` will alter the ResNet model in the 
 2. Replace the last `2` 3x3 convolution layer in the 3rd ResNet Conv block with Deformable Convolution. 
 3. Replace the last `3` 3x3 convolution layer in the 4th ResNet Conv block with Deformable Convolution. 
 4. Replace the last `4` 3x3 convolution layer in the 5th ResNet Conv block with Deformable Convolution. 
+
+## File directory
+
+1. `main.py`
+    * Entry point for performing an experiment.
+2. `data.py`
+    * Functions to download the data and preprocess the images.
+3. `model.py`
+    * Build the model and replace the normal convolution layer with the offset and deformable convolution.
+4. `utils.py`
+    * Callbacks that are called at the end of every training epoch and is used to store training results and best model weights.
+5. `tune.py`
+    * Model tuning code using Optuna.
+6. `train.py`
+    * Training loop for model training and evaluation.
+7. `env.yml`
+    * Conda env for this repository.
