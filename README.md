@@ -58,3 +58,5 @@ For `--with_deformable_conv` flag, `1 2 3 4` will alter the ResNet model in the 
     * Training loop for model training and evaluation.
 7. `env.yml`
     * Conda env for this repository.
+8. `visualise_offsets.py`
+    * Code to generate a video to visualise the offsets

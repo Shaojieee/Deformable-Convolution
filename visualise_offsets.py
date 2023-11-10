@@ -10,7 +10,7 @@ import torch.nn as nn
 from torchvision import transforms as T
 from tqdm import tqdm
 
-
+# Rescale image for video
 def scale_transformation(img, scale_factor=1.0, borderValue=0):
     img_h, img_w = img.shape[0:2]
     
@@ -27,6 +27,7 @@ def scale_transformation(img, scale_factor=1.0, borderValue=0):
     img = cv2.warpAffine(img, sm, (img_w, img_h), borderValue=borderValue)
     return img
 
+# Rotate image for video
 def rotation_transformation(img, angle=3., borderValue=0):
     img_h, img_w = img.shape[0:2]
     rm = cv2.getRotationMatrix2D((img_w // 2, img_h // 2), angle=angle, scale=1.0) # rotation matrix
@@ -49,6 +50,7 @@ def random_rotation(img, scale_factor=1.0, borderValue=0):
     img = cv2.warpAffine(img, sm, (img_w, img_h), borderValue=borderValue)
     return img
 
+# Plot the offsets using the output of the offset conv
 def plot_offsets(img, save_output, roi_x, roi_y):
     cv2.circle(img, center=(roi_x, roi_y), color=(0, 255, 0), radius=1, thickness=-1)
     input_img_h, input_img_w = img.shape[:2]
@@ -90,6 +92,7 @@ def plot_offsets(img, save_output, roi_x, roi_y):
             x = round(x)
             cv2.circle(img, center=(x, y), color=(0, 0, 255), radius=1, thickness=-1)
 
+# class to save the output of the offset conv on every model call
 class SaveOutput:
     def __init__(self):
         self.outputs = []
@@ -100,7 +103,7 @@ class SaveOutput:
     def clear(self):
         self.outputs = []
 
-
+# Load model and build the video
 def generate_offsets():
     args = offset_parse_args()
 
